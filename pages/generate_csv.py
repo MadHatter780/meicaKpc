@@ -168,6 +168,9 @@ st.markdown("""
 
 .st-emotion-cache-1wmy9hl .e1f1d6gn1 > div[data-testid="stVerticalBlock"] .st-emotion-cache-bmmsbz .e1f1d6gn2 > 
 
+.stVerticalBlock .st-emotion-cache-ptdihy .eu6p4el3 div[data-testid="stVerticalBlock"]{
+            background-color:black;
+            }
     st-emotion-cache-keje6w.e1f1d6gn3 {
         width: calc(50% - 1rem);
         flex: 1 1 calc(50% - 1rem);
@@ -266,14 +269,7 @@ with st.container():
     col12, col22, col33 = st.columns(3)
     
     # Kolom 1
-    with col12:
-        st.markdown('<div class="title-style mt-2 mb-4 rounded-xl bg-opacity-0.2 text-3xl bg-black flex text-white justify-center font-bold p-4">SHIFT</div>', unsafe_allow_html=True)
-        st.selectbox("Pilih Dataset", options=list(datasets.keys()), key="nested_selectbox_122")
-        st.selectbox("Pilih Dataset", options=list(datasets.keys()), key="nested_selectbox_1222")
-        st.selectbox("Pilih Dataset", options=list(datasets.keys()), key="nested_selectbox_12211")
-        st.selectbox("Pilih Dataset", options=list(datasets.keys()), key="nested_selectbox_2assa")
-        st.button("Generate", type="primary", key="generate_button_1")
-    
+   
     # Kolom 2
     with col22:
         st.markdown('<div class="title-style mt-2 mb-4 rounded-xl bg-opacity-0.2 text-3xl bg-black flex text-white justify-center font-bold p-4">Trending</div>', unsafe_allow_html=True)
