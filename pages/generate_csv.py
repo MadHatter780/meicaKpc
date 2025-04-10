@@ -1,6 +1,8 @@
 import streamlit as st
 import plotly.graph_objects as go
 import pandas as pd
+import db
+import datetime
 
 # Set up the Streamlit page
 st.set_page_config(layout="wide")
@@ -243,6 +245,10 @@ datasets = {
     }),
 }
 # Membuat grafik Plotly dengan 4 sumbu Y
+
+table_db = ['None']
+table_shift = ['Shif 1', 'Shift 2']
+
 fig = go.Figure()
 
 # Menambahkan data ke grafik
@@ -268,23 +274,25 @@ fig.update_layout(
 with st.container():
     col12, col22, col33 = st.columns(3)
     
+    table_db = db.show_all_tables()
+    
     # Kolom 1
    
     # Kolom 2
     with col22:
         st.markdown('<div class="title-style mt-2 mb-4 rounded-xl bg-opacity-0.2 text-3xl bg-black flex text-white justify-center font-bold p-4">Trending</div>', unsafe_allow_html=True)
-        st.selectbox("Pilih Dataset", options=list(datasets.keys()), key="nested_selectbox_212")
-        st.selectbox("Pilih Dataset", options=list(datasets.keys()), key="nested_selectbox_2222")
-        st.selectbox("Pilih Dataset", options=list(datasets.keys()), key="nested_selectbox_22211")
-        st.selectbox("Pilih Dataset", options=list(datasets.keys()), key="nested_selectbox_22assa")
-        st.button("Generate", type="primary", key="generate_button_2")
-    
+        selected1 = st.selectbox("Pilih Dataset", options=list(table_db), key="nested_selectbox_122")
+        selected2 = st.selectbox("Pilih Dataset", options=list(table_shift), key="nested_selectbox_1222")
+        selected3 = st.date_input("Date", datetime.date(2019,7,6), key="nested_selectbox_12222")
+        st.download_button("Generate", type="primary", key="generate_button_1", data=db.data_csv(selected1, selected3), file_name=f'{selected1}.csv', mime='text/csv')
+
     # Kolom 3
     with col33:
         st.markdown('<div class="title-style mt-2 mb-4 rounded-xl bg-opacity-0.2 text-3xl bg-black flex text-white justify-center font-bold p-4">Trending</div>', unsafe_allow_html=True)
-        st.selectbox("Pilih Dataset", options=list(datasets.keys()), key="nested_selectbox_312")
-        st.selectbox("Pilih Dataset", options=list(datasets.keys()), key="nested_selectbox_3222")
-        st.button("Generate", type="primary", key="generate_button_3")
+        selected4 = st.selectbox("Pilih Dataset", options=list(table_db), key="nested_selectbox_222")
+        selected5 = st.selectbox("Pilih Dataset", options=list(table_shift), key="nested_selectbox_2222")
+        selected6 = st.date_input("Date", datetime.date(2019,7,6), key="nested_selectbox_22222")
+        st.download_button("Generate", type="primary", key="generate_button_2", data=db.data_excel(selected4, selected6), file_name=f'{selected1}.xlsx', mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
 
                          
   

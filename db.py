@@ -1,27 +1,68 @@
 import pyodbc
+import urllib
+import io
+import pandas as pd
+from sqlalchemy import create_engine
 
-server = '192.168.1.33\\SQLEXPRESS01'  # Bisa berupa alamat IP atau nama host
-database = 'lol'
+driver = 'ODBC Driver 17 for SQL Server'
+server = '192.168.1.33,59958\\SQLEXPRESS01'
+database = 'KPC_CHTM'
 username = 'sa'
 password = 'bejokun'
-# Fungsi untuk memeriksa koneksi
-def check_connection():
+
+def get_connection(ss):
     try:
-        # Membuat koneksi
-        conn = pyodbc.connect(f'DRIVER={{ODBC Driver 18 for SQL Server}};'
-                              f'SERVER={server};'
-                              f'DATABASE={database};'
-                              f'UID={username};'
-                              f'PWD={password}')
-        print("Koneksi berhasil ke database.")
-        conn.close()  # Tutup koneksi setelah pengecekan
-        return True
+        if ss == 'sql':
+            conn = pyodbc.connect(f'DRIVER={{ODBC Driver 17 for SQL Server}};'
+                                f'SERVER={server};'
+                                f'DATABASE={database};'
+                                f'UID={username};'
+                                f'PWD={password}')
+            return conn
+        else:
+            params = urllib.parse.quote_plus(f'DRIVER={driver};SERVER={server};DATABASE={database};UID={username};PWD={password}')
+            conn = create_engine(f'mssql+pyodbc:///?odbc_connect={params}')
+            return conn
     except Exception as e:
         print(f"Gagal terhubung ke database: {e}")
-        return False
+        return 0
 
-# Memeriksa koneksi
-if check_connection():
-    print("Koneksi berhasil. Anda dapat melanjutkan ke operasi query.")
-else:
-    print("Tidak dapat melakukan koneksi. Periksa kembali kredensial atau status server.")
+def show_all_tables():
+    conn = get_connection('sql')
+    if not conn:
+        return
+
+    try:
+        cursor = conn.cursor()
+        cursor.execute("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE'")
+        tables = [row[0] for row in cursor.fetchall()]
+        return tables
+    except Exception as e:
+        print(f"Gagal mengambil daftar tabel: {e}")
+    finally:
+        conn.close()
+
+def data_csv(tables, date):
+    conn = get_connection('download')
+    if not conn:
+        return
+    else:
+        query = f'SELECT * FROM [{database}].[dbo].[{tables}]'
+        csv_buffer = io.StringIO()
+        df = pd.read_sql(query, conn)
+        df.to_csv(csv_buffer, index=False)
+        csv_data = csv_buffer.getvalue()
+        return csv_data
+
+def data_excel(tables, date):
+    conn = get_connection('download')
+    if not conn:
+        return
+    else:
+        query = f'SELECT * FROM [{database}].[dbo].[{tables}]'
+        excel_buffer = io.BytesIO()
+        df = pd.read_sql(query, conn)
+        with pd.ExcelWriter(excel_buffer, engine='xlsxwriter') as writer:
+            df.to_excel(writer, index=False, sheet_name='Sheet1')
+        excel_data = excel_buffer.getvalue()
+        return excel_data
