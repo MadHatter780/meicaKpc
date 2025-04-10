@@ -45,11 +45,21 @@ def data_csv(tables, date):
     if not conn:
         return
     else:
-        query = f'SELECT * FROM [{database}].[dbo].[{tables}]'
-        csv_buffer = io.StringIO()
-        df = conn.query(query)
-        df.to_csv(csv_buffer, index=False)
-        csv_data = csv_buffer.getvalue()
+        query_dump = f'SELECT * FROM [{database}].[dbo].[{tables}] WHERE 1=0'
+        dump = conn.query(query_dump)
+        data_dump = dump.columns.to_list()
+        if 'DATE' in data_dump:
+            query = f'SELECT * FROM [{database}].[dbo].[{tables}] WHERE [DATE] = {date}'
+            csv_buffer = io.StringIO()
+            df = conn.query(query)
+            df.to_csv(csv_buffer, index=False)
+            csv_data = csv_buffer.getvalue()
+        else:
+            query = f'SELECT * FROM [{database}].[dbo].[{tables}] WHERE [DateTime] = {date}'
+            csv_buffer = io.StringIO()
+            df = conn.query(query)
+            df.to_csv(csv_buffer, index=False)
+            csv_data = csv_buffer.getvalue()
         return csv_data
 
 def data_excel(tables, date):
@@ -57,10 +67,21 @@ def data_excel(tables, date):
     if not conn:
         return
     else:
-        query = f'SELECT * FROM [{database}].[dbo].[{tables}]'
-        excel_buffer = io.BytesIO()
-        df = conn.query(query)
-        with pd.ExcelWriter(excel_buffer, engine='xlsxwriter') as writer:
-            df.to_excel(writer, index=False, sheet_name='Sheet1')
-        excel_data = excel_buffer.getvalue()
+        query_dump = f'SELECT * FROM [{database}].[dbo].[{tables}] WHERE 1=0'
+        dump = conn.query(query_dump)
+        data_dump = dump.columns.to_list()
+        if 'DATE' in data_dump:
+            query = f'SELECT * FROM [{database}].[dbo].[{tables}] WHERE [DATE] = {date}'
+            excel_buffer = io.BytesIO()
+            df = conn.query(query)
+            with pd.ExcelWriter(excel_buffer, engine='xlsxwriter') as writer:
+                df.to_excel(writer, index=False, sheet_name='Sheet1')
+            excel_data = excel_buffer.getvalue()
+        else:
+            query = f'SELECT * FROM [{database}].[dbo].[{tables}] WHERE [DateTime] = {date}'
+            excel_buffer = io.BytesIO()
+            df = conn.query(query)
+            with pd.ExcelWriter(excel_buffer, engine='xlsxwriter') as writer:
+                df.to_excel(writer, index=False, sheet_name='Sheet1')
+            excel_data = excel_buffer.getvalue()
         return excel_data

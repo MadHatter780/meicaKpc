@@ -283,16 +283,16 @@ with st.container():
         st.markdown('<div class="title-style mt-2 mb-4 rounded-xl bg-opacity-0.2 text-3xl bg-black flex text-white justify-center font-bold p-4">Trending</div>', unsafe_allow_html=True)
         selected1 = st.selectbox("Pilih Dataset", options=list(table_db), key="nested_selectbox_122")
         selected2 = st.selectbox("Pilih Dataset", options=list(table_shift), key="nested_selectbox_1222")
-        selected3 = st.date_input("Date", datetime.date(2019,7,6), key="nested_selectbox_12222")
-        st.download_button("Generate", type="primary", key="generate_button_1", data=db.data_csv(selected1, selected3), file_name=f'{selected1}.csv', mime='text/csv')
+        selected3 = st.date_input("Date", datetime.date(2024,3,1), key="nested_selectbox_12222")
+        st.download_button("Generate", type="primary", key="generate_button_1", data=db.data_csv(selected1, selected3.strftime('%Y-%m-%d')), file_name=f'{selected1}.csv', mime='text/csv')
 
     # Kolom 3
     with col33:
         st.markdown('<div class="title-style mt-2 mb-4 rounded-xl bg-opacity-0.2 text-3xl bg-black flex text-white justify-center font-bold p-4">Trending</div>', unsafe_allow_html=True)
         selected4 = st.selectbox("Pilih Dataset", options=list(table_db), key="nested_selectbox_222")
         selected5 = st.selectbox("Pilih Dataset", options=list(table_shift), key="nested_selectbox_2222")
-        selected6 = st.date_input("Date", datetime.date(2019,7,6), key="nested_selectbox_22222")
-        st.download_button("Generate", type="primary", key="generate_button_2", data=db.data_excel(selected4, selected6), file_name=f'{selected1}.xlsx', mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        selected6 = st.date_input("Date", datetime.date(2024,3,1), key="nested_selectbox_22222")
+        st.download_button("Generate", type="primary", key="generate_button_2", data=db.data_excel(selected4, selected6.strftime('%Y-%m-%d')), file_name=f'{selected1}.xlsx', mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
 
                          
   
