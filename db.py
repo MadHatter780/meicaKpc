@@ -1,8 +1,6 @@
-import pyodbc
-import urllib
-import io
+import streamlit as st
 import pandas as pd
-from sqlalchemy import create_engine, text
+import io
 
 driver = 'ODBC Driver 17 for SQL Server'
 server = '192.168.1.33,59958\\SQLEXPRESS01'
@@ -12,8 +10,19 @@ password = 'bejokun'
 
 def get_connection():
     try:
-        params = urllib.parse.quote_plus(f'DRIVER={driver};SERVER={server};DATABASE={database};UID={username};PWD={password}')
-        conn = create_engine(f'mssql+pyodbc:///?odbc_connect={params}')
+        conn = st.connection(
+            "sql",
+            dialect="mssql",
+            driver="pyodbc",
+            host=server,
+            database=database,
+            username=username,
+            password=password,
+            query={
+                "driver": driver,
+                "encrypt": "no" 
+            }
+        )
         return conn
     except Exception as e:
         print(f"Gagal terhubung ke database: {e}")
@@ -25,13 +34,12 @@ def show_all_tables():
         return
 
     try:
-        cursor = conn.connect()
-        result = cursor.execute(text("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE'"))
-        tables = [row[0] for row in result.fetchall()]
+        result = conn.query("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE'")
+        tables = result['TABLE_NAME'].to_list()
         return tables
     except Exception as e:
         print(f"Gagal mengambil daftar tabel: {e}")
-
+    
 def data_csv(tables, date):
     conn = get_connection()
     if not conn:
@@ -39,7 +47,7 @@ def data_csv(tables, date):
     else:
         query = f'SELECT * FROM [{database}].[dbo].[{tables}]'
         csv_buffer = io.StringIO()
-        df = pd.read_sql(query, conn)
+        df = conn.query(query)
         df.to_csv(csv_buffer, index=False)
         csv_data = csv_buffer.getvalue()
         return csv_data
@@ -51,7 +59,7 @@ def data_excel(tables, date):
     else:
         query = f'SELECT * FROM [{database}].[dbo].[{tables}]'
         excel_buffer = io.BytesIO()
-        df = pd.read_sql(query, conn)
+        df = conn.query(query)
         with pd.ExcelWriter(excel_buffer, engine='xlsxwriter') as writer:
             df.to_excel(writer, index=False, sheet_name='Sheet1')
         excel_data = excel_buffer.getvalue()
