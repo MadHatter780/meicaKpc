@@ -33,7 +33,7 @@ def show_all_tables():
         print(f"Gagal mengambil daftar tabel: {e}")
 
 def data_csv(tables, date):
-    conn = get_connection('download')
+    conn = get_connection()
     if not conn:
         return
     else:
