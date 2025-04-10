@@ -2,7 +2,7 @@ import pyodbc
 import urllib
 import io
 import pandas as pd
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 
 driver = 'ODBC Driver 17 for SQL Server'
 server = '192.168.1.33,59958\\SQLEXPRESS01'
@@ -10,37 +10,27 @@ database = 'KPC_CHTM'
 username = 'sa'
 password = 'bejokun'
 
-def get_connection(ss):
+def get_connection():
     try:
-        if ss == 'sql':
-            conn = pyodbc.connect(f'DRIVER={{ODBC Driver 17 for SQL Server}};'
-                                f'SERVER={server};'
-                                f'DATABASE={database};'
-                                f'UID={username};'
-                                f'PWD={password}')
-            return conn
-        else:
-            params = urllib.parse.quote_plus(f'DRIVER={driver};SERVER={server};DATABASE={database};UID={username};PWD={password}')
-            conn = create_engine(f'mssql+pyodbc:///?odbc_connect={params}')
-            return conn
+        params = urllib.parse.quote_plus(f'DRIVER={driver};SERVER={server};DATABASE={database};UID={username};PWD={password}')
+        conn = create_engine(f'mssql+pyodbc:///?odbc_connect={params}')
+        return conn
     except Exception as e:
         print(f"Gagal terhubung ke database: {e}")
         return 0
 
 def show_all_tables():
-    conn = get_connection('sql')
+    conn = get_connection()
     if not conn:
         return
 
     try:
-        cursor = conn.cursor()
-        cursor.execute("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE'")
-        tables = [row[0] for row in cursor.fetchall()]
+        cursor = conn.connect()
+        result = cursor.execute(text("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE'"))
+        tables = [row[0] for row in result.fetchall()]
         return tables
     except Exception as e:
         print(f"Gagal mengambil daftar tabel: {e}")
-    finally:
-        conn.close()
 
 def data_csv(tables, date):
     conn = get_connection('download')
@@ -55,7 +45,7 @@ def data_csv(tables, date):
         return csv_data
 
 def data_excel(tables, date):
-    conn = get_connection('download')
+    conn = get_connection()
     if not conn:
         return
     else:
